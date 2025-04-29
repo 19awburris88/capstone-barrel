@@ -1,0 +1,45 @@
+/* ------------ REACT SLICK CAROUSEL STYLES ------------ */
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
+
+/* ------------ GLOBAL RESETS & STYLES ------------ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #0B0B0B;
+  color: white;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ------------ UTILITY ------------ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.card {
+  padding: 2em;
+}
+
+footer {
+  background-color: #111;
+  color: gray;
+  text-align: center;
+  padding: 1rem;
+}

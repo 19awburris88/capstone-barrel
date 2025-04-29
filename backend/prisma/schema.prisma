@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  firstName   String
+  lastName    String
+  bio         String?
+  profilePic  String?   // URL
+  role        Role      @default(USER)
+  bottles     Bottle[]  @relation("UserBottles")
+  orders      Order[]   @relation("UserOrders")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Bottle {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  proof       Int
+  image       String?
+  status      BottleStatus @default(AVAILABLE)
+  isActive    Boolean   @default(true)
+
+  sellerId    String
+  seller      User      @relation("UserBottles", fields: [sellerId], references: [id])
+
+  order       Order?    @relation("BottleOrder")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Order {
+  id        String       @id @default(uuid())
+  buyerId   String
+  buyer     User         @relation("UserOrders", fields: [buyerId], references: [id])
+
+  bottleId  String       @unique
+  bottle    Bottle       @relation("BottleOrder", fields: [bottleId], references: [id])
+
+  status    OrderStatus  @default(PENDING)
+  createdAt DateTime     @default(now())
+}
+
+model SeededBottle {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  proof       Int
+  image       String?
+  createdAt   DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BottleStatus {
+  AVAILABLE
+  SOLD
+  HIDDEN
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
