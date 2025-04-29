@@ -7,6 +7,7 @@ import {
   CardMedia,
   CardContent,
 } from '@mui/material';
+import Navbar from '../components/Navbar'; // ✅ Import Navbar
 import ProductModal from '../components/ProductModal';
 import ProductFilterSidebar from '../components/ProductFilterSidebar';
 
@@ -59,58 +60,63 @@ export default function Explore() {
   }
 
   return (
-    <Box sx={{ backgroundColor: '#121212', minHeight: '100vh', color: '#fff', display: 'flex' }}>
-      {/* Sidebar */}
-      <Box sx={{ width: 280, p: 4 }}>
-        <ProductFilterSidebar filters={filters} setFilters={setFilters} />
-      </Box>
+    <Box sx={{ backgroundColor: '#121212', minHeight: '100vh', color: '#fff' }}>
+      {/* ✅ Navbar at the top */}
+      <Navbar />
 
-      {/* Main content */}
-      <Box sx={{ flexGrow: 1, p: 4 }}>
-        <Typography variant="h4" fontWeight="bold" mb={4}>
-          Explore Bottles
-        </Typography>
+      {/* Content Wrapper */}
+      <Box sx={{ display: 'flex' }}>
+        {/* Sidebar */}
+        <Box sx={{ width: 280, p: 4 }}>
+          <ProductFilterSidebar filters={filters} setFilters={setFilters} />
+        </Box>
 
-        <Grid container spacing={3}>
-          {filteredProducts.slice(0, 32).map((product, index) => (
-            <Grid key={index}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  backgroundColor: '#1e1e1e',
-                  borderRadius: 2,
-                  color: '#fff',
-                  cursor: 'pointer',
-                }}
-                onClick={() => setSelectedProduct(product)}
-              >
-                <CardMedia
-                  component="img"
-                  image={product.image}
-                  alt={product.name}
+        {/* Main content */}
+        <Box sx={{ flexGrow: 1, p: 4 }}>
+          <Typography variant="h4" fontWeight="bold" mb={4}>
+            Explore Bottles
+          </Typography>
+
+          <Grid container spacing={3}>
+            {filteredProducts.slice(0, 32).map((product, index) => (
+              <Grid key={index} item xs={12} sm={6} md={3}>
+                <Card
                   sx={{
-                    height: 220,
-                    width: 300,
-                    objectFit: 'contain',
-                    backgroundColor: '#1a1a1a',
-                    p: 1,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    backgroundColor: '#1e1e1e',
+                    borderRadius: 2,
+                    color: '#fff',
+                    cursor: 'pointer',
                   }}
-                />
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    {product.name}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#ccc' }}>
-                    {product.price}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  <CardMedia
+                    component="img"
+                    image={product.image}
+                    alt={product.name}
+                    sx={{
+                      height: 220,
+                      objectFit: 'contain',
+                      backgroundColor: '#1a1a1a',
+                      p: 1,
+                    }}
+                  />
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                      {product.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#ccc' }}>
+                      {product.price}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Box>
 
       {/* Modal */}

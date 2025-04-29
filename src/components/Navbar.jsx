@@ -133,7 +133,7 @@ export default function Navbar() {
                 },
               }}
             >
-              Shop
+              Bottles
             </Button>
 
             <Button
@@ -147,7 +147,7 @@ export default function Navbar() {
                 },
               }}
             >
-              Sell
+              Users
             </Button>
 
             <Button

@@ -1,26 +1,13 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  Container,
-  Button,
-  TextField,
-  Modal,
-  Stack,
-} from '@mui/material';
+import { Box, Typography, Grid, Card, CardMedia, CardContent, Container, Button, TextField, Modal, Stack } from '@mui/material';
 import ProfileHeader from '../components/ProfileHeader';
 import { useNavigate } from 'react-router-dom';
 
 export default function UserStore() {
   const navigate = useNavigate();
 
-  // Safely pull current user from localStorage
-  const storedUser = localStorage.getItem('user');
-  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+  // 🔒 Check if admin token exists
+  const adminToken = localStorage.getItem('adminToken');
 
   const [userProducts, setUserProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
@@ -36,8 +23,8 @@ export default function UserStore() {
   });
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate('/admin-login'); // Redirect to login if no user
+    if (!adminToken) {
+      navigate('/admin-login'); // Redirect non-admins to login
       return;
     }
 
@@ -46,22 +33,18 @@ export default function UserStore() {
         const res = await fetch('http://localhost:3001/api/products');
         const data = await res.json();
         setAllProducts(data);
-
-        const myBottles = data.filter((b) => b.seller_id === currentUser.id);
-        setUserProducts(myBottles);
+        setUserProducts(data); // Admin sees all products
       } catch (err) {
         console.error('❌ Error fetching products:', err);
       }
     };
 
     fetchBottles();
-  }, [currentUser, navigate]);
+  }, [adminToken, navigate]);
 
   const handleAddBottle = () => {
-    if (!currentUser) return; // protect
-
-    const newBottleWithSeller = { ...newBottle, seller_id: currentUser.id };
-    setUserProducts(prevProducts => [...prevProducts, newBottleWithSeller]);
+    const newBottleWithAdmin = { ...newBottle };
+    setUserProducts(prev => [...prev, newBottleWithAdmin]);
     setShowAddModal(false);
     setNewBottle({ name: '', price: '', proof: '', image: '' });
   };
@@ -94,15 +77,15 @@ export default function UserStore() {
   return (
     <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#121212', py: 6 }}>
       <Container maxWidth="lg">
-        {/* Profile Header */}
+        {/* Admin Profile Header */}
         <ProfileHeader
-          name={currentUser?.name}
-          location={currentUser?.location || 'Unknown'}
-          bio={currentUser?.bio || 'No bio yet.'}
-          avatarUrl={currentUser?.avatar_url || 'https://i.pravatar.cc/150'}
+          name="Admin User"
+          location="Admin Access"
+          bio="Manage all bottle listings."
+          avatarUrl="https://i.pravatar.cc/150?u=admin"
         />
 
-        {/* Manage Bottles Section */}
+        {/* Manage Bottles */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
           <Button
             variant="outlined"
@@ -122,7 +105,7 @@ export default function UserStore() {
 
           <TextField
             variant="outlined"
-            placeholder="Search to Add"
+            placeholder="Search Bottles"
             size="small"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -135,9 +118,9 @@ export default function UserStore() {
           />
         </Box>
 
-        {/* Your Bottles Listing */}
+        {/* Bottles Grid */}
         <Typography variant="h5" fontWeight="bold" mb={2} color="#fff">
-          Your Bottles
+          All Bottles
         </Typography>
 
         {userProducts.length === 0 ? (
@@ -204,38 +187,6 @@ export default function UserStore() {
               </Grid>
             ))}
           </Grid>
-        )}
-
-        {/* Search Add Results */}
-        {search && (
-          <Box sx={{ mt: 6 }}>
-            <Typography variant="h6" mb={2} color="#fff">
-              Search Results
-            </Typography>
-            <Grid container spacing={2}>
-              {filteredSearchResults.slice(0, 8).map((product, idx) => (
-                <Grid item xs={6} sm={4} md={3} key={idx}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={() =>
-                      setUserProducts(prev => [...prev, { ...product, seller_id: currentUser.id }])
-                    }
-                    sx={{
-                      borderColor: '#C19A54',
-                      color: '#C19A54',
-                      '&:hover': {
-                        bgcolor: '#C19A54',
-                        color: '#000',
-                      },
-                    }}
-                  >
-                    ➕ {product.name}
-                  </Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
         )}
 
         {/* Add/Edit Modal */}
