@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardMedia, CardContent, Container, Button, TextField, Modal, Stack } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
+  Container,
+  Button,
+  TextField,
+  Modal,
+  Stack,
+} from '@mui/material';
+import Navbar from '../components/Navbar'; // ✅ Import Navbar
 import ProfileHeader from '../components/ProfileHeader';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,8 +88,11 @@ export default function UserStore() {
   );
 
   return (
-    <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#121212', py: 6 }}>
-      <Container maxWidth="lg">
+    <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#121212' }}>
+      {/* ✅ Add Navbar here */}
+      <Navbar />
+
+      <Container maxWidth="lg" sx={{ py: 6 }}>
         {/* Admin Profile Header */}
         <ProfileHeader
           name="Admin User"

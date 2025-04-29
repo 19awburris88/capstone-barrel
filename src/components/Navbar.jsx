@@ -9,13 +9,14 @@ import {
   TextField,
   Stack,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/barrel-logo.png';
 
 export default function Navbar() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [tab, setTab] = useState(0);
+  const [user, setUser] = useState(null); // ✅ Track user login
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -26,6 +27,13 @@ export default function Navbar() {
     password: '',
     profilePic: null,
   });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const handleTabChange = (_, newValue) => setTab(newValue);
 
@@ -53,6 +61,7 @@ export default function Navbar() {
 
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user); // ✅ update UI immediately
         setAuthModalOpen(false);
         navigate('/profile');
       }
@@ -73,6 +82,7 @@ export default function Navbar() {
 
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user); // ✅ update UI immediately
         setAuthModalOpen(false);
         navigate('/profile');
       } else {
@@ -81,6 +91,12 @@ export default function Navbar() {
     } catch (err) {
       console.error('❌ Login error:', err);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null); // ✅ update UI immediately
+    navigate('/');
   };
 
   const inputStyles = {
@@ -119,9 +135,16 @@ export default function Navbar() {
     <>
       <AppBar position="static" sx={{ bgcolor: '#1A1A1A', px: 2 }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Box component="img" src={logo} alt="Barrel Exchange Logo" sx={{ height: 100 }} />
+          <Box
+            component="img"
+            src={logo}
+            alt="Barrel Exchange Logo"
+            sx={{ height: 100, cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          />
 
           <Stack direction="row" spacing={3}>
+            {/* Always visible */}
             <Button
               color="inherit"
               onClick={() => navigate('/explore')}
@@ -138,7 +161,7 @@ export default function Navbar() {
 
             <Button
               color="inherit"
-              onClick={() => navigate('/store')}
+              onClick={() => navigate('/users')}
               sx={{
                 color: '#fff',
                 fontWeight: 'bold',
@@ -150,20 +173,71 @@ export default function Navbar() {
               Users
             </Button>
 
-            <Button
-              onClick={() => setAuthModalOpen(true)}
-              sx={{
-                color: '#fff',
-                fontWeight: 'bold',
-                border: '1px solid #C19A54',
-                '&:hover': {
-                  backgroundColor: '#C19A54',
-                  color: '#000',
-                },
-              }}
-            >
-              Login / Register
-            </Button>
+            {/* Only visible if logged in */}
+            {user && (
+              <>
+                <Button
+                  color="inherit"
+                  onClick={() => navigate('/admin')}
+                  sx={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      color: '#C19A54',
+                    },
+                  }}
+                >
+                  Dashboard
+                </Button>
+
+                <Button
+                  color="inherit"
+                  onClick={() => navigate('/store')}
+                  sx={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      color: '#C19A54',
+                    },
+                  }}
+                >
+                  Manage
+                </Button>
+
+                <Button
+                  onClick={handleLogout}
+                  sx={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    border: '1px solid #C19A54',
+                    '&:hover': {
+                      backgroundColor: '#C19A54',
+                      color: '#000',
+                    },
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            )}
+
+            {/* If NOT logged in */}
+            {!user && (
+              <Button
+                onClick={() => setAuthModalOpen(true)}
+                sx={{
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  border: '1px solid #C19A54',
+                  '&:hover': {
+                    backgroundColor: '#C19A54',
+                    color: '#000',
+                  },
+                }}
+              >
+                Login / Register
+              </Button>
+            )}
           </Stack>
         </Toolbar>
       </AppBar>

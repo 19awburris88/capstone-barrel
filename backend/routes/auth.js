@@ -77,7 +77,12 @@ router.post('/login', async (req, res) => {
       return res.json({
         message: 'Admin login successful',
         token,
-        role: 'admin',
+        user: {
+          id: 0,
+          email: dummyAdmin.email,
+          role: dummyAdmin.role,
+          name: 'Admin User',
+        },
       });
     }
 
@@ -94,6 +99,7 @@ router.post('/login', async (req, res) => {
       user: {
         id: 1,
         email,
+        role: 'user',
         name: 'Demo User',
       },
     });
