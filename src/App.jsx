@@ -1,35 +1,37 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Home from './pages/Home';
 import Explore from './pages/Explore';
 import Profile from './pages/Profile';
 import UserStore from './pages/UserStore';
-import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import Users from './pages/Users'; // ✅ Import new Users page
+import Users from './pages/Users';
 
 export default function App() {
-  const isAdmin = !!localStorage.getItem('adminToken');
+  const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem('adminToken'));
+  const location = useLocation(); // 👈 triggers effect on route change
+
+  // 🔁 Re-check localStorage on every route change
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    setIsAdmin(!!token);
+  }, [location]);
 
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/explore" element={<Explore />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/users" element={<Users />} /> {/* ✅ Add this line */}
-      <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/users" element={<Users />} />
 
-      {/* 🔒 Protect store route - Admin only */}
       <Route
-        path="/store"
-        element={isAdmin ? <UserStore /> : <Navigate to="/admin-login" replace />}
+        path="/userstore"
+        element={isAdmin ? <UserStore /> : <Navigate to="/" replace />}
       />
-
-      {/* 🔒 Protect admin dashboard route */}
       <Route
         path="/admin"
-        element={isAdmin ? <AdminDashboard /> : <Navigate to="/admin-login" replace />}
+        element={isAdmin ? <AdminDashboard /> : <Navigate to="/" replace />}
       />
     </Routes>
   );

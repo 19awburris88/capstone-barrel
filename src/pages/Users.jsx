@@ -9,21 +9,20 @@ import {
   CardHeader,
 } from '@mui/material';
 import Navbar from '../components/Navbar';
-import { useNavigate } from 'react-router-dom';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users`);
+        const res = await fetch('http://localhost:3001/api/users');
         const data = await res.json();
 
         const enhanced = data.map((user, index) => ({
           ...user,
-          profilePic: user.profilePic || `https://i.pravatar.cc/300?img=${index + 5}`,
+          profilePic:
+            user.profilePic || `https://i.pravatar.cc/300?img=${index + 5}`,
         }));
 
         setUsers(enhanced);
@@ -36,7 +35,7 @@ export default function Users() {
   }, []);
 
   const handleCardClick = () => {
-    navigate('/profile');
+    window.location.href = 'http://localhost:5173/profile';
   };
 
   return (
@@ -54,16 +53,17 @@ export default function Users() {
               <Card
                 onClick={handleCardClick}
                 sx={{
-                  width: 280,
+                  width: '100%',
+                  maxWidth: 280,
                   height: 420,
-                  mx: 'auto',
-                  backgroundColor: '#1e1e1e',
-                  borderRadius: 2,
-                  color: '#fff',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  cursor: 'pointer',
+                  backgroundColor: '#1e1e1e',
+                  borderRadius: 2,
+                  color: '#fff',
+                  mx: 'auto',
+                  cursor: 'pointer', // Make it obviously clickable
                   transition: 'transform 0.3s, box-shadow 0.3s',
                   '&:hover': {
                     transform: 'scale(1.05)',

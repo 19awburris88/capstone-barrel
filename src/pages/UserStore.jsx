@@ -12,14 +12,12 @@ import {
   Modal,
   Stack,
 } from '@mui/material';
-import Navbar from '../components/Navbar'; // ✅ Import Navbar
+import Navbar from '../components/Navbar';
 import ProfileHeader from '../components/ProfileHeader';
 import { useNavigate } from 'react-router-dom';
 
 export default function UserStore() {
   const navigate = useNavigate();
-
-  // 🔒 Check if admin token exists
   const adminToken = localStorage.getItem('adminToken');
 
   const [userProducts, setUserProducts] = useState([]);
@@ -37,7 +35,7 @@ export default function UserStore() {
 
   useEffect(() => {
     if (!adminToken) {
-      navigate('/admin-login'); // Redirect non-admins to login
+      navigate('/');
       return;
     }
 
@@ -46,7 +44,7 @@ export default function UserStore() {
         const res = await fetch('http://localhost:3001/api/products');
         const data = await res.json();
         setAllProducts(data);
-        setUserProducts(data); // Admin sees all products
+        setUserProducts(data);
       } catch (err) {
         console.error('❌ Error fetching products:', err);
       }
@@ -89,11 +87,9 @@ export default function UserStore() {
 
   return (
     <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#121212' }}>
-      {/* ✅ Add Navbar here */}
       <Navbar />
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        {/* Admin Profile Header */}
         <ProfileHeader
           name="Admin User"
           location="Admin Access"
@@ -101,7 +97,6 @@ export default function UserStore() {
           avatarUrl="https://i.pravatar.cc/150?u=admin"
         />
 
-        {/* Manage Bottles */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
           <Button
             variant="outlined"
@@ -134,7 +129,6 @@ export default function UserStore() {
           />
         </Box>
 
-        {/* Bottles Grid */}
         <Typography variant="h5" fontWeight="bold" mb={2} color="#fff">
           All Bottles
         </Typography>
@@ -144,10 +138,13 @@ export default function UserStore() {
         ) : (
           <Grid container spacing={3}>
             {userProducts.map((bottle, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Grid item xs={12} sm={6} md={3} key={index}>
                 <Card
                   sx={{
-                    height: '100%',
+                    height: 360,
+                    width: '100%',
+                    maxWidth: 280,
+                    margin: '0 auto',
                     backgroundColor: '#1e1e1e',
                     color: '#fff',
                     borderRadius: 2,
@@ -161,7 +158,12 @@ export default function UserStore() {
                     component="img"
                     image={bottle.image}
                     alt={bottle.name}
-                    sx={{ height: 200, objectFit: 'contain', backgroundColor: '#1a1a1a', p: 1 }}
+                    sx={{
+                      height: 140,
+                      objectFit: 'contain',
+                      backgroundColor: '#1a1a1a',
+                      p: 1,
+                    }}
                   />
                   <CardContent sx={{ p: 0 }}>
                     <Typography variant="subtitle1" fontWeight="bold">
@@ -205,7 +207,6 @@ export default function UserStore() {
           </Grid>
         )}
 
-        {/* Add/Edit Modal */}
         <Modal
           open={showAddModal || showEditModal}
           onClose={() => {

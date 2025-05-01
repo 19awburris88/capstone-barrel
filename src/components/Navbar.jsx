@@ -16,7 +16,7 @@ import logo from '../assets/barrel-logo.png';
 export default function Navbar() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [tab, setTab] = useState(0);
-  const [user, setUser] = useState(null); // ✅ Track user login
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -59,11 +59,12 @@ export default function Navbar() {
       const data = await res.json();
       console.log('✅ Registration success:', data);
 
-      if (data.user) {
+      if (data.user && data.token) {
         localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user); // ✅ update UI immediately
+        localStorage.setItem('adminToken', data.token); // ✅ Store token for access
+        setUser(data.user);
         setAuthModalOpen(false);
-        navigate('/profile');
+        navigate('/userstore');
       }
     } catch (err) {
       console.error('❌ Registration error:', err);
@@ -80,11 +81,12 @@ export default function Navbar() {
       const data = await res.json();
       console.log('✅ Login success:', data);
 
-      if (data.user) {
+      if (data.user && data.token) {
         localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user); // ✅ update UI immediately
+        localStorage.setItem('adminToken', data.token); // ✅ Store token for access
+        setUser(data.user);
         setAuthModalOpen(false);
-        navigate('/profile');
+        navigate('/userstore');
       } else {
         console.error('❌ Login failed:', data.error || 'Unknown error');
       }
@@ -95,7 +97,8 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    setUser(null); // ✅ update UI immediately
+    localStorage.removeItem('adminToken');
+    setUser(null);
     navigate('/');
   };
 
@@ -144,16 +147,13 @@ export default function Navbar() {
           />
 
           <Stack direction="row" spacing={3}>
-            {/* Always visible */}
             <Button
               color="inherit"
               onClick={() => navigate('/explore')}
               sx={{
                 color: '#fff',
                 fontWeight: 'bold',
-                '&:hover': {
-                  color: '#C19A54',
-                },
+                '&:hover': { color: '#C19A54' },
               }}
             >
               Bottles
@@ -165,15 +165,12 @@ export default function Navbar() {
               sx={{
                 color: '#fff',
                 fontWeight: 'bold',
-                '&:hover': {
-                  color: '#C19A54',
-                },
+                '&:hover': { color: '#C19A54' },
               }}
             >
               Users
             </Button>
 
-            {/* Only visible if logged in */}
             {user && (
               <>
                 <Button
@@ -182,28 +179,22 @@ export default function Navbar() {
                   sx={{
                     color: '#fff',
                     fontWeight: 'bold',
-                    '&:hover': {
-                      color: '#C19A54',
-                    },
+                    '&:hover': { color: '#C19A54' },
                   }}
                 >
                   Dashboard
                 </Button>
-
                 <Button
                   color="inherit"
-                  onClick={() => navigate('/store')}
+                  onClick={() => navigate('/userstore')}
                   sx={{
                     color: '#fff',
                     fontWeight: 'bold',
-                    '&:hover': {
-                      color: '#C19A54',
-                    },
+                    '&:hover': { color: '#C19A54' },
                   }}
                 >
                   Manage
                 </Button>
-
                 <Button
                   onClick={handleLogout}
                   sx={{
@@ -221,7 +212,6 @@ export default function Navbar() {
               </>
             )}
 
-            {/* If NOT logged in */}
             {!user && (
               <Button
                 onClick={() => setAuthModalOpen(true)}
@@ -242,7 +232,6 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* 🔐 Login/Register Modal */}
       <Modal open={authModalOpen} onClose={() => setAuthModalOpen(false)}>
         <Box
           sx={{
@@ -262,15 +251,9 @@ export default function Navbar() {
             variant="fullWidth"
             sx={{
               mb: 3,
-              '& .MuiTab-root': {
-                color: '#bbb',
-              },
-              '& .Mui-selected': {
-                color: '#C19A54',
-              },
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#C19A54',
-              },
+              '& .MuiTab-root': { color: '#bbb' },
+              '& .Mui-selected': { color: '#C19A54' },
+              '& .MuiTabs-indicator': { backgroundColor: '#C19A54' },
             }}
           >
             <Tab label="Login" />
