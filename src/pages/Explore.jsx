@@ -7,47 +7,38 @@ import {
   CardMedia,
   CardContent,
   Container,
-  Button,
-  TextField,
   Modal,
+  Button,
   Stack,
 } from '@mui/material';
 import Navbar from '../components/Navbar';
-import ProfileHeader from '../components/ProfileHeader';
-import { useNavigate } from 'react-router-dom';
-import blantonImage from '../assets/blanton.png'; // ✅ Import local image
+import ProductFilterSidebar from '../components/ProductFilterSidebar';
+import blantonImage from '../assets/blanton.png';
 
-export default function UserStore() {
-  const navigate = useNavigate();
-  const adminToken = localStorage.getItem('adminToken');
-
+export default function Explore() {
   const [allProducts, setAllProducts] = useState([]);
-  const [search, setSearch] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
-  const [newBottle, setNewBottle] = useState({
-    name: '',
-    price: '',
-    proof: '',
-    image: '',
+  const [filters, setFilters] = useState({
+    search: '',
+    price: [0, 2500],
+    proof: [80, 140],
   });
+  const [selectedBottle, setSelectedBottle] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!adminToken) {
-      navigate('/admin-login');
-      return;
-    }
-
     const fetchBottles = async () => {
       try {
         const res = await fetch('http://localhost:3001/api/products');
         const data = await res.json();
 
+        console.log('✅ Raw product data from API:', data);
+
         const enhanced = data.map((bottle) => ({
           ...bottle,
           image: bottle.image && bottle.image.startsWith('http') ? bottle.image : blantonImage,
         }));
+
+        console.log('🖼️ Enhanced product data with images:', enhanced);
 
         setAllProducts(enhanced);
       } catch (err) {
@@ -56,39 +47,13 @@ export default function UserStore() {
     };
 
     fetchBottles();
-  }, [adminToken, navigate]);
+  }, []);
 
-  // 🔥 Correct live search filtering
-  const filteredProducts = allProducts.filter((bottle) =>
-    bottle.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = allProducts;
 
-  const handleAddBottle = () => {
-    const newBottleWithImage = { ...newBottle, image: newBottle.image || blantonImage };
-    setAllProducts((prev) => [...prev, newBottleWithImage]);
-    setShowAddModal(false);
-    setNewBottle({ name: '', price: '', proof: '', image: '' });
-  };
-
-  const handleEditBottle = () => {
-    const updated = [...allProducts];
-    updated[editIndex] = { ...newBottle, image: newBottle.image || blantonImage };
-    setAllProducts(updated);
-    setShowEditModal(false);
-    setNewBottle({ name: '', price: '', proof: '', image: '' });
-    setEditIndex(null);
-  };
-
-  const handleDeleteBottle = (index) => {
-    const updated = [...allProducts];
-    updated.splice(index, 1);
-    setAllProducts(updated);
-  };
-
-  const openEditModal = (index) => {
-    setNewBottle(filteredProducts[index]);
-    setEditIndex(index);
-    setShowEditModal(true);
+  const handleCardClick = (bottle) => {
+    setSelectedBottle(bottle);
+    setIsModalOpen(true);
   };
 
   return (
@@ -96,191 +61,126 @@ export default function UserStore() {
       <Navbar />
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <ProfileHeader
-          name="Admin User"
-          location="Admin Access"
-          bio="Manage all bottle listings."
-          avatarUrl="https://i.pravatar.cc/150?u=admin"
-        />
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setShowAddModal(true)}
-            sx={{
-              borderColor: '#C19A54',
-              color: '#C19A54',
-              fontWeight: 'bold',
-              '&:hover': {
-                bgcolor: '#C19A54',
-                color: '#000',
-              },
-            }}
-          >
-            ➕ Add New Bottle
-          </Button>
-
-          <TextField
-            variant="outlined"
-            placeholder="Search Bottles"
-            size="small"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{
-              input: { color: 'white' },
-              label: { color: '#bbb' },
-              bgcolor: '#1e1e1e',
-              borderRadius: 1,
-            }}
-          />
-        </Box>
-
-        <Typography variant="h5" fontWeight="bold" mb={2} color="#fff">
-          All Bottles
+        <Typography variant="h4" fontWeight="bold" mb={3} color="#fff">
+          Explore Bottles
         </Typography>
 
-        {filteredProducts.length === 0 ? (
-          <Typography color="#aaa">No bottles match your search.</Typography>
-        ) : (
-          <Grid container spacing={3}>
-            {filteredProducts.map((bottle, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card
-                  sx={{
-                    width: 280, // ✅ FIXED width
-                    height: 420, // ✅ FIXED height
-                    mx: 'auto',
-                    backgroundColor: '#1e1e1e',
-                    color: '#fff',
-                    borderRadius: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s, box-shadow 0.3s',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                      boxShadow: '0 4px 20px rgba(255, 255, 255, 0.2)',
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={bottle.image}
-                    alt={bottle.name}
-                    sx={{
-                      height: 220,
-                      objectFit: 'contain',
-                      backgroundColor: '#1a1a1a',
-                      p: 1,
-                    }}
-                  />
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom noWrap>
-                      {bottle.name}
-                    </Typography>
-                    <Typography variant="body2" color="#ccc">
-                      {bottle.price}
-                    </Typography>
-                    <Typography variant="body2" color="#ccc">
-                      Proof: {bottle.proof}
-                    </Typography>
-                  </CardContent>
+        <Stack direction="row" spacing={3}>
+          {/* Sidebar - smaller width */}
+          <Box sx={{ width: 260 }}>
+            <ProductFilterSidebar filters={filters} setFilters={setFilters} />
+          </Box>
 
-                  <Stack direction="row" spacing={1} mt={2} sx={{ px: 1 }}>
-                    <Button
-                      fullWidth
-                      onClick={() => openEditModal(index)}
-                      variant="outlined"
+          {/* Grid - 3 clean columns */}
+          <Box sx={{ flexGrow: 1 }}>
+            {filteredProducts.length === 0 ? (
+              <Typography color="#aaa">No bottles match your filters.</Typography>
+            ) : (
+              <Grid container columns={3} spacing={3}>
+                {filteredProducts.map((bottle, index) => (
+                  <Grid key={index} sx={{ gridColumn: 'span 1' }}>
+                    <Card
+                      onClick={() => handleCardClick(bottle)}
                       sx={{
-                        borderColor: '#C19A54',
-                        color: '#C19A54',
+                        width: 240,
+                        height: 380,
+                        mx: 'auto',
+                        backgroundColor: '#1e1e1e',
+                        color: '#fff',
+                        borderRadius: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        transition: 'transform 0.3s, box-shadow 0.3s',
+                        cursor: 'pointer',
                         '&:hover': {
-                          bgcolor: '#C19A54',
-                          color: '#000',
+                          transform: 'scale(1.05)',
+                          boxShadow: '0 4px 20px rgba(255, 255, 255, 0.2)',
                         },
                       }}
                     >
-                      Edit
-                    </Button>
-                    <Button
-                      fullWidth
-                      onClick={() => handleDeleteBottle(index)}
-                      variant="outlined"
-                      color="error"
-                    >
-                      Delete
-                    </Button>
-                  </Stack>
-                </Card>
+                      <CardMedia
+                        component="img"
+                        image={bottle.image}
+                        alt={bottle.name}
+                        sx={{
+                          height: 200,
+                          objectFit: 'contain',
+                          backgroundColor: '#1a1a1a',
+                          p: 1,
+                        }}
+                      />
+                      <CardContent>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom noWrap>
+                          {bottle.name}
+                        </Typography>
+                        <Typography variant="body2" color="#ccc">
+                          ${bottle.price}
+                        </Typography>
+                        <Typography variant="body2" color="#ccc">
+                          Proof: {bottle.proof}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
-        )}
+            )}
+          </Box>
+        </Stack>
       </Container>
 
-      {/* Add/Edit Modal */}
-      <Modal
-        open={showAddModal || showEditModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setShowEditModal(false);
-          setEditIndex(null);
-          setNewBottle({ name: '', price: '', proof: '', image: '' });
-        }}
-      >
+      {/* Modal */}
+      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Box
           sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             width: 400,
             bgcolor: '#1e1e1e',
-            p: 4,
+            color: '#fff',
             borderRadius: 2,
-            mx: 'auto',
-            mt: 10,
-            color: 'white',
+            boxShadow: 24,
+            p: 4,
           }}
         >
-          <Typography variant="h6" mb={3}>
-            {showEditModal ? 'Edit Bottle' : 'Add New Bottle'}
-          </Typography>
-
-          <Stack spacing={2}>
-            <TextField
-              variant="filled"
-              label="Bottle Name"
-              value={newBottle.name}
-              onChange={(e) => setNewBottle({ ...newBottle, name: e.target.value })}
-              sx={{ input: { color: 'white' }, label: { color: '#ccc' } }}
-            />
-            <TextField
-              variant="filled"
-              label="Price"
-              value={newBottle.price}
-              onChange={(e) => setNewBottle({ ...newBottle, price: e.target.value })}
-              sx={{ input: { color: 'white' }, label: { color: '#ccc' } }}
-            />
-            <TextField
-              variant="filled"
-              label="Proof"
-              value={newBottle.proof}
-              onChange={(e) => setNewBottle({ ...newBottle, proof: e.target.value })}
-              sx={{ input: { color: 'white' }, label: { color: '#ccc' } }}
-            />
-            <TextField
-              variant="filled"
-              label="Image URL"
-              value={newBottle.image}
-              onChange={(e) => setNewBottle({ ...newBottle, image: e.target.value })}
-              sx={{ input: { color: 'white' }, label: { color: '#ccc' } }}
-            />
-            <Button
-              variant="contained"
-              onClick={showEditModal ? handleEditBottle : handleAddBottle}
-              sx={{ bgcolor: '#C19A54', color: '#000', fontWeight: 'bold' }}
-            >
-              {showEditModal ? 'Save Changes' : 'Add Bottle'}
-            </Button>
-          </Stack>
+          {selectedBottle && (
+            <>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                {selectedBottle.name}
+              </Typography>
+              <img
+                src={selectedBottle.image}
+                alt={selectedBottle.name}
+                style={{
+                  width: '100%',
+                  height: '200px',
+                  objectFit: 'contain',
+                  backgroundColor: '#1a1a1a',
+                  padding: '8px',
+                }}
+              />
+              <Typography variant="body2" mt={2}>
+                ${selectedBottle.price}
+              </Typography>
+              <Typography variant="body2">Proof: {selectedBottle.proof}</Typography>
+              <Typography variant="body2" mb={2}>
+                {selectedBottle.description || 'No description available.'}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => {
+                  window.location.href = `http://localhost:3001/api/checkout/create-checkout-session/${selectedBottle.id}`;
+                }}
+              >
+                Buy Now
+              </Button>
+            </>
+          )}
         </Box>
       </Modal>
     </Box>
