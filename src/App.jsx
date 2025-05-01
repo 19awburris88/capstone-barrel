@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import Home from './pages/Home';
+import Home from './pages/home';
 import Explore from './pages/Explore';
 import Profile from './pages/Profile';
 import UserStore from './pages/UserStore';
